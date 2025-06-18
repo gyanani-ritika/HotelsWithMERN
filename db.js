@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const mongoURL = 'mongodb://localhost:27017/hotels'; //hotels is the name of the database
-
+const mongoURLRemote = 'mongodb+srv://ritikagyanani5379:satnam_sakshi03@cluster0.vuafahx.mongodb.net/'
 mongoose.connect(mongoURL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
