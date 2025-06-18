@@ -1,6 +1,8 @@
 const express = require('express')
 const db = require('./db')
 const app = express()
+require('dotenv').config() // Load environment variables from .env file
+const PORT = process.env.PORT
 
 const bodyParser = require('body-parser')
 app.use(bodyParser.json()) // Middleware to parse JSON bodies
@@ -18,4 +20,6 @@ app.use('/person', personRoutes)
 app.use('/menu', menuRoutes)
 // The above lines mount the person and menu routes to the main app.
 
-app.listen(3000)
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});

@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
+require('dotenv').config(); // Load environment variables from .env file
+const mongoURL = process.env.LOCAL_DB_URL
+const mongoURLRemote = process.env.REMOTE_DB_URL
+// process.env.REMOTE_DB_URL is used to get the value of REMOTE_DB_URL from the .env file
 
-const mongoURL = 'mongodb://localhost:27017/hotels'; //hotels is the name of the database
-const mongoURLRemote = 'mongodb+srv://ritikagyanani5379:satnam_sakshi03@cluster0.vuafahx.mongodb.net/'
 mongoose.connect(mongoURL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
