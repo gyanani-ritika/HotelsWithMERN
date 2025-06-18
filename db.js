@@ -4,7 +4,7 @@ const mongoURL = process.env.LOCAL_DB_URL
 const mongoURLRemote = process.env.REMOTE_DB_URL
 // process.env.REMOTE_DB_URL is used to get the value of REMOTE_DB_URL from the .env file
 
-mongoose.connect(mongoURL, {
+mongoose.connect(mongoURLRemote, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
