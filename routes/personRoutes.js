@@ -1,17 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const Person = require('../models/Person');
+const { jwtAuthMiddleware, generateToken } = require('./../jwt');
+const { use } = require('passport');
 
-//add a new person
-router.post('/', async (req, res) => {
+//signup a new person with JWT token generation
+router.post('/signup', async (req, res) => {
     try {
         const data = req.body // Get the person data from the request body
         const newPerson = new Person(data); // Create a new instance of the Person model with the data
         const savedPerson = await newPerson.save(); // Save the new person to the database
-        //await is used to wait for the save operation to complete
         console.log('Person created');
-        res.status(200).json(savedPerson);
 
+        const payload = {
+            id: savedPerson.id,
+            userName: savedPerson.userName,
+        }
+        console.log('Payload for token:', payload);
+
+        const token = generateToken(payload);// Generate a JWT token using the saved person's id and username
+        console.log('Token generated:', token);
+        res.status(200).json({ response: savedPerson, token: token });
 
     } catch (error) {
         console.error('Error creating person:', error);
@@ -19,8 +28,59 @@ router.post('/', async (req, res) => {
     }
 })
 
+
+//Login route with JWT token generation
+router.post('/login', async (req, res) => {
+    try {
+        const { userName, password } = req.body; // Get username and password from request body
+        const user = await Person.findOne({ userName }); // Find the person by username
+
+        // If user is not found, return a 404 error
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Check if the password is correct
+        const isPasswordValid = await user.comparePassword(password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+
+        // If login is successful, generate a JWT token
+        const payload = {
+            id: user.id,
+            userName: user.userName,
+        };
+        const token = generateToken(payload);
+        res.status(200).json({ token });
+
+    } catch (error) {
+        console.error('Error logging in:', error);
+        res.status(500).json({ error: 'Failed to log in' });
+    }
+});
+
+//profile route to get the logged-in user's details
+router.get('/profile', jwtAuthMiddleware, async (req, res) => {
+    try {
+        const userData = req.user; // Get the user data from the JWT token
+        console.log('User data from token:', userData);
+        const user = await Person.findById(userData.id); // Find the user by ID
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).json(user); // Send the user details as a JSON response
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        res.status(500).json({ error: 'Failed to fetch profile' });
+    }
+});
+
+
 // Get all persons
-router.get('/', async (req, res) => {
+router.get('/', jwtAuthMiddleware, async (req, res) => {
     try {
         const data = await Person.find(); // Fetch all persons from the database
         res.status(200).json(data); // Send the fetched persons as a JSON response
